@@ -14,7 +14,7 @@ from ctypes import (
 from ctypes.wintypes import FILETIME
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 from powguid import Guid
 
@@ -28,12 +28,25 @@ class DevicePropertyKey(Structure):
         ("pid", c_uint32),
     )
 
+    if TYPE_CHECKING:
+        fmtid: Guid
+        pid: int
+
     @staticmethod
     def from_define(a: int, b: int, c: int, d: int, e: int, f: int, g: int, h: int, i: int, j: int, k: int, pid: int):
         key = DevicePropertyKey()
         key.fmtid = Guid.from_define(a, b, c, d, e, f, g, h, i, j, k)
         key.pid = pid
         return key
+
+    def __str__(self) -> str:
+        return f"{self.fmtid} {self.pid}"
+
+    def __repr__(self) -> str:
+        return f"{self.fmtid} {self.pid}"
+
+    def __hash__(self) -> int:
+        return hash((self.fmtid, self.pid))
 
 
 class DevicePropertyModifier(IntEnum):
@@ -96,82 +109,90 @@ DEVICE_PROPERTY_EMPTY: Final = DevicePropertyEmptyType()
 class DeviceProperty:
     key: DevicePropertyKey
     type: DevicePropertyType
-    data_raw: bytes
+    value_raw: bytes
 
     @property
-    def data(self) -> object | None:
+    def value(self) -> object | None:
         match self.type:
             case DevicePropertyType.EMPTY:
                 return DEVICE_PROPERTY_EMPTY
             case DevicePropertyType.NULL:
                 return DEVICE_PROPERTY_NULL
             case DevicePropertyType.SBYTE:
-                return c_int8.from_buffer(self.data_raw).value
+                return c_int8.from_buffer(self.value_raw).value
             case DevicePropertyType.BYTE:
-                return c_uint8.from_buffer(self.data_raw).value
+                return c_uint8.from_buffer(self.value_raw).value
             case DevicePropertyType.INT16:
-                return c_int16.from_buffer(self.data_raw).value
+                return c_int16.from_buffer(self.value_raw).value
             case DevicePropertyType.UINT16:
-                return c_uint16.from_buffer(self.data_raw).value
+                return c_uint16.from_buffer(self.value_raw).value
             case DevicePropertyType.INT32:
-                return c_int32.from_buffer(self.data_raw).value
+                return c_int32.from_buffer(self.value_raw).value
             case DevicePropertyType.UINT32:
-                return c_uint32.from_buffer(self.data_raw).value
+                return c_uint32.from_buffer(self.value_raw).value
             case DevicePropertyType.INT64:
-                return c_int64.from_buffer(self.data_raw).value
+                return c_int64.from_buffer(self.value_raw).value
             case DevicePropertyType.UINT64:
-                return c_uint64.from_buffer(self.data_raw).value
+                return c_uint64.from_buffer(self.value_raw).value
             case DevicePropertyType.FLOAT:
-                return c_float.from_buffer(self.data_raw).value
+                return c_float.from_buffer(self.value_raw).value
             case DevicePropertyType.DOUBLE:
-                return c_double.from_buffer(self.data_raw).value
+                return c_double.from_buffer(self.value_raw).value
             case DevicePropertyType.GUID:
-                return Guid.from_buffer(self.data_raw).value
+                return Guid.from_buffer(self.value_raw).value
             # CURRENCY = 0x0000000E
             # DATE = 0x0000000F
             case DevicePropertyType.FILETIME:
-                return FILETIME.from_buffer_copy(self.data_raw)
+                return FILETIME.from_buffer_copy(self.value_raw)
             case DevicePropertyType.BOOLEAN:
-                return self.data_raw[0] != 0
+                return self.value_raw[0] != 0
             case DevicePropertyType.STRING:
-                return self.data_raw[:-2].decode("utf-16le")
+                return self.value_raw[:-2].decode("utf-16le")
             case DevicePropertyType.STRING_LIST:
-                return self.data_raw[:-4].decode("utf-16le").split("\0")
+                return self.value_raw[:-4].decode("utf-16le").split("\0")
             case DevicePropertyType.SECURITY_DESCRIPTOR:
-                return self.data_raw
+                return self.value_raw
             case DevicePropertyType.SECURITY_DESCRIPTOR_STRING:
-                return self.data_raw[:-2].decode("utf-16le")
+                return self.value_raw[:-2].decode("utf-16le")
             case DevicePropertyType.DEVPROPKEY:
-                return DevicePropertyKey.from_buffer(self.data_raw)
+                return DevicePropertyKey.from_buffer(self.value_raw)
             case DevicePropertyType.DEVPROPTYPE:
-                return DevicePropertyType(int.from_bytes(self.data_raw[0:4], "little"))
+                return DevicePropertyType(int.from_bytes(self.value_raw[0:4], "little"))
             case DevicePropertyType.BINARY:
-                return self.data_raw
+                return self.value_raw
             case DevicePropertyType.ERROR:
-                return int.from_bytes(self.data_raw[0:4], "little")
+                return int.from_bytes(self.value_raw[0:4], "little")
             case DevicePropertyType.NTSTATUS:
-                return int.from_bytes(self.data_raw[0:4], "little")
+                return int.from_bytes(self.value_raw[0:4], "little")
             case DevicePropertyType.STRING_INDIRECT:
-                return self.data_raw.decode("utf-16le")
+                return self.value_raw.decode("utf-16le")
             case _:
                 return None
 
     def __str__(self) -> str:
-        return f"{str(self.data)} ({self.type.name})"
+        return f"{str(self.value)} ({self.type.name})"
 
     def __repr__(self) -> str:
-        return f"{str(self.data)} ({self.type.name})"
+        return f"{str(self.value)} ({self.type.name})"
 
+    def __hash__(self) -> int:
+        return hash((self.key, self.type, self.value))
 
-class AnyDeviceDevicePropertyKeys:
-    NAME = DevicePropertyKey.from_define(
-        0xB725F130, 0x47EF, 0x101A, 0xA5, 0xF1, 0x02, 0x60, 0x8C, 0x9E, 0xEB, 0xAC, 10
-    )  # DEVPROP_TYPE_STRING
+    @property
+    def str_or_none(self) -> str | None:
+        x = self.value
+        return x if isinstance(x, str) else None
 
-    __slots__ = ()
+    @property
+    def int_or_none(self) -> int | None:
+        x = self.value
+        return x if isinstance(x, int) else None
 
 
 class DevicePropertyKeys:
+    NAME = DevicePropertyKey.from_define(
+        0xB725F130, 0x47EF, 0x101A, 0xA5, 0xF1, 0x02, 0x60, 0x8C, 0x9E, 0xEB, 0xAC, 10
+    )  # DEVPROP_TYPE_STRING
     DEVICE_DESC = DevicePropertyKey.from_define(
         0xA45C254E, 0xDF1C, 0x4EFD, 0x80, 0x20, 0x67, 0xD1, 0x46, 0xA8, 0x50, 0xE0, 2
     )  # // DEVPROP_TYPE_STRING
@@ -529,7 +550,7 @@ class DevicePackageDevicePropertyKeys:
     __slots__ = ()
 
 
-class DeviceClassProeprtyKeys:
+class DeviceClassPropertyKeys:
     UPPER_FILTERS = DevicePropertyKey.from_define(
         0x4321918B, 0xF69E, 0x470D, 0xA5, 0xDE, 0x4D, 0x88, 0xC7, 0x5A, 0xD2, 0x4B, 19
     )  # // DEVPROP_TYPE_STRING_LIST
