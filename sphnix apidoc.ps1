@@ -1,0 +1,1 @@
+sphinx-apidoc -f -o sphnix\source\apiref src --no-toc --remove-old

@@ -1,1 +1,1 @@
-pip uninstall .
+pip uninstall powc
