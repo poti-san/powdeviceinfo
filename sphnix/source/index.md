@@ -4,7 +4,9 @@ PythonからWindowsのデバイス管理機能を使いやすくするための�
 
 ```{toctree}
 ---
-maxdepth: 3
+hidden:
 ---
 apiref/powdeviceinfo
+genindex
+modindex
 ```
