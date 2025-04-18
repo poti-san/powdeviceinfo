@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>powdeviceinfoドキュメント &mdash; powdeviceinfo  ドキュメント</title>
+  <title>powdeviceinfoパッケージ &mdash; powdeviceinfo  ドキュメント</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -62,7 +62,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">powdeviceinfoドキュメント</li>
+      <li class="breadcrumb-item active">powdeviceinfoパッケージ</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -73,10 +73,32 @@
            <div itemprop="articleBody">
              
   <section id="powdeviceinfo">
-<h1>powdeviceinfoドキュメント<a class="headerlink" href="#powdeviceinfo" title="Link to this heading"></a></h1>
-<p>PythonからWindowsのデバイス管理機能を使いやすくするためのパッケージです。</p>
+<h1>powdeviceinfoパッケージ<a class="headerlink" href="#powdeviceinfo" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<p>PythonからWindowsのデバイス管理機能を使いやすくするパッケージです。デバイスプロパティ、コンフィグマネージャーを含みます。標準ライブラリとpowguidパッケージに依存します。</p>
+<section id="powdeviceinfo-devprop">
+<h2>powdeviceinfo.devprop<a class="headerlink" href="#powdeviceinfo-devprop" title="Link to this heading"></a></h2>
+<p>デバイスプロパティ、型、定数。</p>
+</section>
+<section id="powdeviceinfo-cfgmgr">
+<h2>powdeviceinfo.cfgmgr<a class="headerlink" href="#powdeviceinfo-cfgmgr" title="Link to this heading"></a></h2>
+<p><strong>セットアップクラスのクラス名を取得</strong></p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pp</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">powdeviceinfo.cfgmgr</span><span class="w"> </span><span class="kn">import</span> <span class="n">CMSetupClass</span>
+
+<span class="n">pp</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">classname_or_none</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span> <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">CMSetupClass</span><span class="o">.</span><span class="n">iter</span><span class="p">()))</span>
+</pre></div>
+</div>
+<p><strong>バッテリークラスデバイスの情報を取得</strong></p>
+<div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">powdeviceinfo.cfgmgr</span><span class="w"> </span><span class="kn">import</span> <span class="n">CMDevice</span>
+
+<span class="k">for</span> <span class="n">device</span> <span class="ow">in</span> <span class="n">CMDevice</span><span class="o">.</span><span class="n">iter_deviceid_by_classname</span><span class="p">(</span><span class="s2">&quot;battery&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">((</span><span class="n">device</span><span class="o">.</span><span class="n">devinst</span><span class="p">,</span> <span class="n">device</span><span class="o">.</span><span class="n">name_or_none</span><span class="p">,</span> <span class="n">device</span><span class="o">.</span><span class="n">instanceid_or_none</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
