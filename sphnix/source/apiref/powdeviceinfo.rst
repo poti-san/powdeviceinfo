@@ -1,6 +1,11 @@
 powdeviceinfo package
 =====================
 
+.. automodule:: powdeviceinfo
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Subpackages
 -----------
 
@@ -12,18 +17,7 @@ Subpackages
 Submodules
 ----------
 
-powdeviceinfo.devprop module
-----------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: powdeviceinfo.devprop
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: powdeviceinfo
-   :members:
-   :show-inheritance:
-   :undoc-members:
+   powdeviceinfo.devprop

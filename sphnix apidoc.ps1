@@ -1,1 +1,1 @@
-sphinx-apidoc -f -o sphnix\source\apiref src --no-toc --remove-old
+sphinx-apidoc -f -o sphnix\source\apiref src --no-toc --remove-old --separate --module-first
